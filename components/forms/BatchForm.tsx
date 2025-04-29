@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -26,35 +24,32 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useBatches } from '@/lib/hooks/use-batches';
+import {
+  batchFormSchema,
+  BatchFormSchemaValues
+} from '@/lib/validation/batchSchema';
+import { createBatch, updateBatch } from '@/lib/actions/batch.action';
+import { useToast } from '@/hooks/use-toast';
+import { IBatch } from '@/database/batch.model';
 // import { createBatch } from '@/lib/actions/batch-actions';
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Batch name must be at least 2 characters.'
-  }),
-  description: z.string().min(10, {
-    message: 'Batch description must be at least 10 characters.'
-  })
-});
 
 interface BatchFormProps {
   type?: 'edit' | 'create';
   batchId?: string;
+  batch?: IBatch;
 }
 
-export default function BatchForm({ batchId, type }: BatchFormProps) {
+export default function BatchForm({ batchId, type, batch }: BatchFormProps) {
   const router = useRouter();
-  const { batches } = useBatches();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const batch = batches.find((b) => b.id === batchId);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: batch?.id
+  const form = useForm<BatchFormSchemaValues>({
+    resolver: zodResolver(batchFormSchema),
+    defaultValues: batch?._id
       ? {
           name: batch.name,
-          description: batch.description
+          description: batch?.description
         }
       : {
           name: '',
@@ -62,18 +57,58 @@ export default function BatchForm({ batchId, type }: BatchFormProps) {
         }
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: BatchFormSchemaValues) {
     setIsSubmitting(true);
 
     try {
-      // In a real app, this would be a server action to create a batch
-      //   await createBatch(values.name);
-      //   router.push('/admin');
-      console.log('Create batch values', values);
-
-      //   router.refresh();
+      if (type === 'create') {
+        const res = await createBatch(values);
+        if (res.success) {
+          console.log('Create batch values', values);
+          toast({
+            title: 'Batch Created',
+            description: 'Batch created successfully.',
+            variant: 'default'
+          });
+          setIsSubmitting(false);
+          router.push('/admin/batches');
+        } else {
+          toast({
+            title: 'Batch Creation Failed',
+            description: res.error?.message,
+            variant: 'destructive'
+          });
+          setIsSubmitting(false);
+        }
+      } else {
+        const res = await updateBatch({
+          _id: batchId,
+          ...values
+        });
+        if (res.success) {
+          console.log('Create batch values', values);
+          toast({
+            title: 'Batch updated',
+            description: 'Batch updated successfully.',
+            variant: 'default'
+          });
+          setIsSubmitting(false);
+          router.push('/admin/batches');
+        } else {
+          toast({
+            title: 'Batch Update Failed',
+            description: res.error?.message,
+            variant: 'destructive'
+          });
+          setIsSubmitting(false);
+        }
+      }
     } catch (error) {
       console.error('Failed to create batch:', error);
+      toast({
+        title: 'An unexpected error occurred',
+        variant: 'destructive'
+      });
     } finally {
       setIsSubmitting(false);
     }

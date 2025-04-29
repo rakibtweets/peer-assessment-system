@@ -3,8 +3,11 @@ import { PlusCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import BatchesTable from '@/components/tables/batches-table';
+import { getAllBatches } from '@/lib/actions/batch.action';
 
-export default function BatchesPage() {
+export default async function BatchesPage() {
+  const res = await getAllBatches();
+  const batches = res.data?.batches || [];
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -21,7 +24,7 @@ export default function BatchesPage() {
           </Link>
         </Button>
       </div>
-      <BatchesTable />
+      <BatchesTable batches={batches} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import BatchForm from '@/components/forms/BatchForm';
+import { getBatchById } from '@/lib/actions/batch.action';
 
 interface BatchEditPageProps {
   params: {
@@ -6,7 +7,9 @@ interface BatchEditPageProps {
   };
 }
 
-export default function BatchEditPage({ params }: BatchEditPageProps) {
+export default async function BatchEditPage({ params }: BatchEditPageProps) {
+  const response = await getBatchById(params.batchId);
+  const batch = response.data?.batch;
   return (
     <div className="space-y-6">
       <div>
@@ -14,7 +17,7 @@ export default function BatchEditPage({ params }: BatchEditPageProps) {
         <p className="text-muted-foreground">Update batch information.</p>
       </div>
       <div className="max-w-md">
-        <BatchForm type="edit" batchId={params.batchId} />
+        <BatchForm type="edit" batchId={batch?._id as string} batch={batch} />
       </div>
     </div>
   );

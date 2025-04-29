@@ -8,7 +8,7 @@ export default function NewBatchPage() {
         <p className="text-muted-foreground">Add a new batch to the system.</p>
       </div>
       <div className="max-w-md">
-        <BatchForm />
+        <BatchForm type="create" />
       </div>
     </div>
   );

@@ -36,21 +36,19 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
-import { useBatches } from '@/lib/hooks/use-batches';
 
-export default function BatchesTable() {
-  const { batches, loading } = useBatches();
+// import { useBatches } from '@/lib/hooks/use-batches';
+import { IBatch } from '@/database/batch.model';
+import { formatDate } from '@/lib/utils';
+import DeleteBatchButton from '../buttons/DeleteBatchButton';
+import { usePathname } from 'next/navigation';
+
+interface IBatchTableProps {
+  batches: IBatch[];
+}
+
+export default function BatchesTable({ batches }: IBatchTableProps) {
+  const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{
     key: keyof (typeof batches)[0] | null;
@@ -61,8 +59,8 @@ export default function BatchesTable() {
   });
 
   // Filter batches based on search term
-  const filteredBatches = batches.filter((batch) =>
-    batch.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBatches = batches?.filter((batch) =>
+    batch?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sort batches based on sort config
@@ -88,22 +86,6 @@ export default function BatchesTable() {
       direction = 'descending';
     }
     setSortConfig({ key, direction });
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  // Handle batch deletion
-  const handleDeleteBatch = (batchId: string) => {
-    console.log(`Deleting batch with ID: ${batchId}`);
-    // In a real app, you would call an API to delete the batch
-    // and then refresh the data
   };
 
   return (
@@ -162,30 +144,26 @@ export default function BatchesTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : sortedBatches.length === 0 ? (
+            {sortedBatches.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                   No batches found.
                 </TableCell>
               </TableRow>
             ) : (
-              sortedBatches.map((batch) => (
-                <TableRow key={batch.id}>
-                  <TableCell className="font-medium">{batch.id}</TableCell>
-                  <TableCell>{batch.name}</TableCell>
+              sortedBatches?.map((batch) => (
+                <TableRow key={batch._id as string}>
+                  <TableCell className="font-medium">
+                    {batch._id as string}
+                  </TableCell>
+                  <TableCell>{batch?.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      {batch.memberCount}
+                      {batch?.memberCount}
                     </div>
                   </TableCell>
-                  <TableCell>{formatDate(batch.createdAt)}</TableCell>
+                  <TableCell>{formatDate(batch?.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -197,49 +175,22 @@ export default function BatchesTable() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/batches/${batch.id}`}>
+                          <Link href={`/admin/batches/${batch._id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Members
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/batches/edit/${batch.id}`}>
+                          <Link href={`/admin/batches/edit/${batch._id}`}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              <Trash className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Are you absolutely sure?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will
-                                permanently delete the batch and all associated
-                                member data.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteBatch(batch.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <DeleteBatchButton
+                          batchId={batch._id as string}
+                          pathname={pathname}
+                        />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
