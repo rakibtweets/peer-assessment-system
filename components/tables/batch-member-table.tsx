@@ -18,19 +18,39 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useBatchMembers } from '@/lib/hooks/use-batch-members';
+import { IMember } from '@/database/member.model';
+import { IBatch } from '@/database/batch.model';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Pencil } from 'lucide-react';
+import { Button } from '../ui/button';
+import { usePathname } from 'next/navigation';
+import DeleteBatchMemberButton from '../buttons/DeleteBatchMemberButton';
+import Link from 'next/link';
 
 interface BatchMembersTableProps {
   batchId: string;
+  members: IMember[];
+  batch?: IBatch;
 }
 
-export function BatchMembersTable({ batchId }: BatchMembersTableProps) {
-  const { members, batchName } = useBatchMembers(batchId);
+export function BatchMembersTable({
+  batchId,
+  members,
+  batch
+}: BatchMembersTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState(members);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const filtered = members.filter(
+    const filtered = members?.filter(
       (member) =>
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.bdNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,7 +64,7 @@ export function BatchMembersTable({ batchId }: BatchMembersTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{batchName} - Members</CardTitle>
+        <CardTitle>{batch?.name} - Members</CardTitle>
         <CardDescription>A list of all members in this batch.</CardDescription>
         <div className="mt-4">
           <Input
@@ -57,7 +77,7 @@ export function BatchMembersTable({ batchId }: BatchMembersTableProps) {
       </CardHeader>
       <CardContent>
         <Table>
-          <TableCaption>A list of all members in {batchName}.</TableCaption>
+          <TableCaption>A list of all members in {batch?.name}.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>BD Number</TableHead>
@@ -72,7 +92,7 @@ export function BatchMembersTable({ batchId }: BatchMembersTableProps) {
           <TableBody>
             {filteredData.length > 0 ? (
               filteredData.map((member) => (
-                <TableRow key={member.id}>
+                <TableRow key={member._id as string}>
                   <TableCell>{member.bdNo}</TableCell>
                   <TableCell>{member.bupNo}</TableCell>
                   <TableCell>{member.rank}</TableCell>
@@ -80,6 +100,33 @@ export function BatchMembersTable({ batchId }: BatchMembersTableProps) {
                   <TableCell>{member.branch}</TableCell>
                   <TableCell>{member.averageMarks}</TableCell>
                   <TableCell>{member.submissionCount}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/batches/${batchId}/edit/${member._id}`}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DeleteBatchMemberButton
+                          memberId={member._id as string}
+                          pathname={pathname}
+                        />
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (

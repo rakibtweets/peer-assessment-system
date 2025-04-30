@@ -1,5 +1,7 @@
 import { BatchMembersTable } from '@/components/tables/batch-member-table';
 import { Button } from '@/components/ui/button';
+import { getBatchById } from '@/lib/actions/batch.action';
+import { getAllMembersByBatchId } from '@/lib/actions/member.action';
 import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,7 +11,15 @@ interface BatchPageProps {
   };
 }
 
-export default function BatchPage({ params }: BatchPageProps) {
+export default async function BatchPage({ params }: BatchPageProps) {
+  const response = await getAllMembersByBatchId({
+    batchId: params.batchId
+  });
+  const batchMembers = response.data?.members || [];
+
+  const batchResult = await getBatchById(params.batchId);
+  const batch = batchResult.data?.batch;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -26,7 +36,11 @@ export default function BatchPage({ params }: BatchPageProps) {
           </Link>
         </Button>
       </div>
-      <BatchMembersTable batchId={params.batchId} />
+      <BatchMembersTable
+        batch={batch}
+        members={batchMembers}
+        batchId={params.batchId}
+      />
     </div>
   );
 }

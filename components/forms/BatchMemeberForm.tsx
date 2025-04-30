@@ -33,80 +33,98 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useBatchById } from '@/lib/hooks/use-batch-by-id';
-
-const formSchema = z.object({
-  bdNo: z.string().min(1, 'BD Number is required'),
-  bupNo: z.string().min(1, 'BUP Number is required'),
-  rank: z.string().min(1, 'Rank is required'),
-  name: z.string().min(1, 'Name is required'),
-  branch: z.string().min(1, 'Branch is required')
-});
+import { batchMemberformSchema } from '@/lib/validation/memberSchema';
+import {
+  createBatchMember,
+  updateBatchMember
+} from '@/lib/actions/member.action';
+import { useToast } from '@/hooks/use-toast';
+import { IBatch } from '@/database/batch.model';
+import { IMember } from '@/database/member.model';
 
 interface BatchMemberFormProps {
   batchId: string;
+  type?: 'create' | 'update';
+  batch?: IBatch;
+  member?: IMember;
 }
 
-export function BatchMemberForm({ batchId }: BatchMemberFormProps) {
+export function BatchMemberForm({
+  batchId,
+  type,
+  batch,
+  member
+}: BatchMemberFormProps) {
   const router = useRouter();
-  const { batch, loading } = useBatchById(batchId);
+  const { toast } = useToast();
+  // const { batch, loading } = useBatchById(batchId);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof batchMemberformSchema>>({
+    resolver: zodResolver(batchMemberformSchema),
     defaultValues: {
-      bdNo: '',
-      bupNo: '',
-      rank: '',
-      name: '',
-      branch: ''
+      bdNo: member?.bdNo || '',
+      bupNo: member?.bupNo || '',
+      rank: member?.rank || '',
+      name: member?.name || '',
+      branch: member?.branch || ''
     }
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof batchMemberformSchema>) {
     setIsSubmitting(true);
 
     try {
-      //   await addMemberToBatch(batchId, values);
-      //   router.push(`/admin/batches/${batchId}`);
-      //   router.refresh();
-      console.log('Adding member:', values);
+      if (type === 'create') {
+        const res = await createBatchMember({
+          ...values,
+          batchId: batchId
+        });
+        if (res.success) {
+          console.log('Create batch Meber values', values);
+          toast({
+            title: 'Batch member created',
+            description: 'Batch member created successfully.',
+            variant: 'default'
+          });
+          setIsSubmitting(false);
+          router.push(`/admin/batches/${batchId}`);
+        } else {
+          toast({
+            title: 'Batch Member Creation Failed',
+            description: res.error?.message,
+            variant: 'destructive'
+          });
+          setIsSubmitting(false);
+        }
+      } else {
+        const res = await updateBatchMember({
+          _id: member?._id,
+          ...values
+        });
+        if (res.success) {
+          console.log('Create batch member values', values);
+          toast({
+            title: 'Batch member updated',
+            description: 'Batch member updated successfully.',
+            variant: 'default'
+          });
+          setIsSubmitting(false);
+          router.push(`/admin/batches/${batchId}`);
+        } else {
+          toast({
+            title: 'Batch Member Update Failed',
+            description: res.error?.message,
+            variant: 'destructive'
+          });
+          setIsSubmitting(false);
+        }
+      }
     } catch (error) {
       console.error('Failed to add member:', error);
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Loading...</CardTitle>
-          <CardDescription>Fetching batch information.</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  if (!batch) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Batch not found</CardTitle>
-          <CardDescription>
-            The requested batch could not be found.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button
-            variant="outline"
-            onClick={() => router.push('/admin/batches')}
-          >
-            Back to Batches
-          </Button>
-        </CardFooter>
-      </Card>
-    );
   }
 
   const rankOptions = [
@@ -122,7 +140,7 @@ export function BatchMemberForm({ batchId }: BatchMemberFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Add Member to {batch.name}</CardTitle>
+        <CardTitle>Add Member to {batch?.name}</CardTitle>
         <CardDescription>
           Enter the details for the new batch member.
         </CardDescription>
@@ -254,7 +272,11 @@ export function BatchMemberForm({ batchId }: BatchMemberFormProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Member'}
+              {isSubmitting ? (
+                <>{type === 'create' ? 'Adding...' : 'Updating...'}</>
+              ) : (
+                <>{type === 'create' ? 'Add Member' : 'Update Member'}</>
+              )}
             </Button>
           </CardFooter>
         </form>
