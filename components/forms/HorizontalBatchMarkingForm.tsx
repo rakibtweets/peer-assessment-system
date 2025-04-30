@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,11 +22,19 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 // import { submitBatchMarks } from '@/lib/actions/submission-actions';
 import { getAllMembersByBatchId } from '@/lib/actions/member.action';
 import { IMember } from '@/database/member.model';
 import { BatchSelector } from '../batch-selector';
+import { Form } from '../ui/form';
 
 // Create a schema for the marks
 const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
@@ -35,15 +43,11 @@ const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
   members.forEach((member) => {
     // Skip the current member (can't mark themselves)
     if (member._id !== currentMemberId) {
-      schema[member._id as string] = z.coerce
-        .number()
-        .min(1, 'Marks must be at least 1')
-        .max(26, 'Marks cannot exceed 26');
-      // .optional();
+      schema[member._id as string] = z.number();
     }
   });
 
-  return z.object(schema).required();
+  return z.object(schema);
 };
 
 export function HorizontalBatchMarkingForm() {
@@ -140,7 +144,7 @@ export function HorizontalBatchMarkingForm() {
             batchId: selectedBatchId,
             marker: currentMember._id,
             markerBdNo: currentMember.bdNo,
-            recipient: member.id,
+            recipient: member._id,
             recipientBDNo: member.bdNo,
             marks: marks as number
           };
@@ -264,21 +268,42 @@ export function HorizontalBatchMarkingForm() {
                                 Cannot mark yourself
                               </span>
                             ) : (
-                              <div className="flex flex-col">
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={26}
-                                  placeholder="1-26"
-                                  {...form.register(member._id as string, {
-                                    valueAsNumber: true
-                                  })}
-                                  className="w-20"
-                                />
+                              <div className="flex flex-col items-center">
+                                <Select
+                                  onValueChange={(value) =>
+                                    form.setValue(
+                                      member._id as string,
+                                      Number.parseInt(value),
+                                      { shouldValidate: true }
+                                    )
+                                  }
+                                  value={
+                                    form
+                                      .watch(member._id as string)
+                                      ?.toString() || ''
+                                  }
+                                >
+                                  <SelectTrigger className="w-20">
+                                    <SelectValue placeholder="1-26" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from(
+                                      { length: 26 },
+                                      (_, i) => i + 1
+                                    ).map((mark) => (
+                                      <SelectItem
+                                        key={mark}
+                                        value={mark.toString()}
+                                      >
+                                        {mark}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 {form.formState.errors[
                                   member._id as string
                                 ] && (
-                                  <p className="text-sm font-medium text-destructive ml-2 mt-1">
+                                  <p className="text-sm font-medium text-destructive ml-2">
                                     {
                                       form.formState.errors[
                                         member._id as string
