@@ -1,7 +1,6 @@
 'use server';
 
 import handleError from '../handlers/error';
-import mongoose from 'mongoose';
 import action from '../handlers/action';
 import Member, { IMember } from '@/database/member.model';
 import dbConnect from '../db/mongoose';
@@ -9,14 +8,10 @@ import {
   CreateBatchMemberParams,
   GetAllMembersByBatchIdParams
 } from '@/types/actions';
-import Batch, { IBatch } from '@/database/batch.model';
+import Batch from '@/database/batch.model';
 import { revalidatePath } from 'next/cache';
-import {
-  BatchFormSchemaValues,
-  batchFormSchema
-} from '../validation/batchSchema';
+
 import { batchMemberformSchema } from '../validation/memberSchema';
-import { stringify } from 'querystring';
 
 export async function getAllMembersByBatchId(
   params: GetAllMembersByBatchIdParams
@@ -61,6 +56,15 @@ export async function createBatchMember(data: CreateBatchMemberParams): Promise<
     const member = await Member.create(data);
     if (!member) {
       throw new Error('Failed to create batch');
+    }
+    // push memberId to batch members array
+    const batch = await Batch.findOneAndUpdate(
+      { _id: data.batchId },
+      { $push: { members: member._id }, $inc: { memberCount: 1 } },
+      { new: true }
+    );
+    if (!batch) {
+      throw new Error('Failed to update batch member count');
     }
     revalidatePath(`/admin/batches/${data.batchId}`);
 
@@ -146,7 +150,7 @@ interface IDeleteBatchMemberParams {
 export async function deleteBatchMember({
   memberId,
   path
-}: IDeleteBatchMemberParams): Promise<ActionResponse<{ member: IMemeber }>> {
+}: IDeleteBatchMemberParams): Promise<ActionResponse<{ member: IMember }>> {
   const validationResult = await action({
     params: { _id: memberId, path }
   });
@@ -160,6 +164,18 @@ export async function deleteBatchMember({
     if (!member) {
       throw new Error('Failed to delete member');
     }
+    // remove memberId from batch members array
+
+    const batch = await Batch.findOneAndUpdate(
+      { _id: member.batchId },
+      { $pull: { members: member._id }, $inc: { memberCount: -1 } },
+      { new: true }
+    );
+
+    if (!batch) {
+      throw new Error('Failed to update batch member count');
+    }
+
     revalidatePath(path);
 
     return {

@@ -10,6 +10,7 @@ import {
   BatchFormSchemaValues
 } from '../validation/batchSchema';
 import dbConnect from '../db/mongoose';
+import Member from '@/database/member.model';
 
 // get all Batches
 export async function getAllBatches(): Promise<
@@ -152,6 +153,12 @@ export async function deleteBatch({
     if (!batch) {
       throw new Error('Failed to delete batch');
     }
+
+    // Delete members from Memeber model
+    await Member.deleteMany({
+      batch: batch._id
+    });
+
     revalidatePath(path);
 
     return {

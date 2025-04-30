@@ -1,10 +1,11 @@
-import { Schema, models, model, Document } from 'mongoose';
+import mongoose, { Schema, models, model, Document } from 'mongoose';
 
 // Interface for Batch document
 export interface IBatch extends Document {
   name: string;
   description?: string;
   memberCount: number;
+  members: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +25,12 @@ const batchSchema = new Schema<IBatch>(
       type: Number,
       default: 0
     },
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Member'
+      }
+    ],
     createdAt: {
       type: Date,
       default: Date.now
