@@ -38,12 +38,12 @@ const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
       schema[member._id as string] = z.coerce
         .number()
         .min(1, 'Marks must be at least 1')
-        .max(26, 'Marks cannot exceed 26')
-        .optional();
+        .max(26, 'Marks cannot exceed 26');
+      // .optional();
     }
   });
 
-  return z.object(schema);
+  return z.object(schema).required();
 };
 
 export function HorizontalBatchMarkingForm() {
@@ -235,111 +235,36 @@ export function HorizontalBatchMarkingForm() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="sticky left-0 bg-background z-10">
-                          Member Info
-                        </TableHead>
-                        {members.map((member) => (
-                          <TableHead
-                            key={member._id as string}
-                            className="text-center min-w-[120px]"
-                          >
-                            {member._id === currentMember._id ? (
-                              <span className="text-muted-foreground italic">
-                                (You)
-                              </span>
-                            ) : (
-                              <>
-                                <div className="font-medium">{member.name}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {member.bdNo}
-                                </div>
-                              </>
-                            )}
-                          </TableHead>
-                        ))}
+                        <TableHead>BD No</TableHead>
+                        <TableHead>BUP No</TableHead>
+                        <TableHead>Rank</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Branch</TableHead>
+                        <TableHead>Marks (1-26)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          BD No
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`bd-${member._id}`}
-                            className="text-center"
-                          >
-                            {member.bdNo}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          BUP No
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`bup-${member._id}`}
-                            className="text-center"
-                          >
-                            {member.bupNo}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          Rank
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`rank-${member._id}`}
-                            className="text-center"
-                          >
-                            {member.rank}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          Name
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`name-${member._id}`}
-                            className="text-center"
-                          >
-                            {member.name}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          Branch
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`branch-${member._id}`}
-                            className="text-center"
-                          >
-                            {member.branch}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          Marks (1-26)
-                        </TableCell>
-                        {members.map((member) => (
-                          <TableCell
-                            key={`marks-${member._id}`}
-                            className="text-center"
-                          >
+                      {members?.map((member) => (
+                        <TableRow
+                          key={member._id as string}
+                          className={
+                            member._id === currentMember._id
+                              ? 'bg-muted/50'
+                              : ''
+                          }
+                        >
+                          <TableCell>{member.bdNo}</TableCell>
+                          <TableCell>{member.bupNo}</TableCell>
+                          <TableCell>{member.rank}</TableCell>
+                          <TableCell>{member.name}</TableCell>
+                          <TableCell>{member.branch}</TableCell>
+                          <TableCell>
                             {member._id === currentMember._id ? (
                               <span className="text-muted-foreground italic">
-                                N/A
+                                Cannot mark yourself
                               </span>
                             ) : (
-                              <div className="flex justify-center">
+                              <div className="flex flex-col">
                                 <Input
                                   type="number"
                                   min={1}
@@ -348,21 +273,24 @@ export function HorizontalBatchMarkingForm() {
                                   {...form.register(member._id as string, {
                                     valueAsNumber: true
                                   })}
-                                  className="w-20 text-center"
+                                  className="w-20"
                                 />
+                                {form.formState.errors[
+                                  member._id as string
+                                ] && (
+                                  <p className="text-sm font-medium text-destructive ml-2 mt-1">
+                                    {
+                                      form.formState.errors[
+                                        member._id as string
+                                      ]?.message as string
+                                    }
+                                  </p>
+                                )}
                               </div>
                             )}
-                            {form.formState.errors[member._id as string] && (
-                              <p className="text-sm font-medium text-destructive mt-1">
-                                {
-                                  form.formState.errors[member._id as string]
-                                    ?.message as string
-                                }
-                              </p>
-                            )}
                           </TableCell>
-                        ))}
-                      </TableRow>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
