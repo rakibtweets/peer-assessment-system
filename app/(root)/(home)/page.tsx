@@ -1,4 +1,6 @@
-import MarkForm from '@/components/forms/MarkForm';
+// import MarkForm from '@/components/forms/MarkForm';
+
+import { HorizontalBatchMarkingForm } from '@/components/forms/HorizontalBatchMarkingForm';
 
 export default function Home() {
   return (
@@ -9,7 +11,8 @@ export default function Home() {
           Fill out the form below to mark your batch mates. Each person can mark
           others with a score between 1 and 26.
         </p>
-        <MarkForm />
+        {/* <MarkForm /> */}
+        <HorizontalBatchMarkingForm />
       </div>
     </main>
   );
