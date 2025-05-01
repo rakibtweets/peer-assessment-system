@@ -37,6 +37,7 @@ import { Form } from '../ui/form';
 import { createSubmission } from '@/lib/actions/submission.action';
 import { SubmissionFormValues } from '@/lib/validation/submissionSchema';
 import { IBatch } from '@/database/batch.model';
+import { useRouter } from 'next/navigation';
 
 // Create a schema for the marks
 const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
@@ -70,6 +71,7 @@ export function HorizontalBatchMarkingForm({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [currentMember, setCurrentMember] = useState<IMember | null>(null);
+  const router = useRouter();
 
   // Create a dynamic form schema based on members
   const formSchema = createMarkingSchema(
@@ -183,8 +185,8 @@ export function HorizontalBatchMarkingForm({
           title: 'Success',
           description: `Successfully submitted marks for ${response.data?.submissions.length} members.`
         });
-        form.reset();
-        setSubmitting(false);
+
+        router.push(`/submission/${currentMember._id}`);
       } else {
         toast({
           title: 'Error',
@@ -192,8 +194,6 @@ export function HorizontalBatchMarkingForm({
           variant: 'destructive'
         });
       }
-
-      // Reset the form
     } catch (error) {
       console.error('Failed to submit marks:', error);
       toast({

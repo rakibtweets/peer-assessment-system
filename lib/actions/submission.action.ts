@@ -5,12 +5,12 @@ import handleError from '../handlers/error';
 import { revalidatePath } from 'next/cache';
 import Submission from '@/database/submission.model';
 import dbConnect from '../db/mongoose';
-import mongoose from 'mongoose';
 import {
   SubmissionFormValues,
   submissionFormSchema
 } from '../validation/submissionSchema';
-import Member from '@/database/member.model';
+import Member, { IMember } from '@/database/member.model';
+import { IGetSubmissionByMarker } from '@/types/actions';
 
 export async function createSubmission(data: SubmissionFormValues[]): Promise<
   ActionResponse<{
@@ -75,6 +75,51 @@ export async function createSubmission(data: SubmissionFormValues[]): Promise<
       success: true,
       data: {
         submissions: JSON.parse(JSON.stringify(createdSubmissions))
+      }
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getSubmissionByMarker(markerId: string): Promise<
+  ActionResponse<{
+    submissions: IGetSubmissionByMarker[];
+    marker: IMember;
+  }>
+> {
+  try {
+    await dbConnect();
+
+    const submissions = await Submission.find({ marker: markerId })
+      .populate({
+        path: 'recipient',
+        select: 'name bdNo rank',
+        model: Member
+      })
+      .sort({ submitted: -1 });
+
+    if (!submissions) {
+      throw new Error('No submissions found');
+    }
+
+    const formatted = submissions.map((submission) => ({
+      recipient: {
+        name: submission.recipient.name,
+        bdNo: submission.recipient.bdNo,
+        rank: submission.recipient.rank
+      },
+      marks: submission.marks,
+      submitted: submission.createdAt
+    })) as IGetSubmissionByMarker[];
+
+    const marker = await Member.findById(markerId).select('name _id bdNo');
+
+    return {
+      success: true,
+      data: {
+        submissions: formatted,
+        marker: marker
       }
     };
   } catch (error) {
