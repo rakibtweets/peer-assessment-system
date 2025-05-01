@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil } from 'lucide-react';
 import { Button } from '../ui/button';
 import { usePathname } from 'next/navigation';
 import DeleteBatchMemberButton from '../buttons/DeleteBatchMemberButton';
@@ -114,9 +114,28 @@ export function BatchMembersTable({
                         <DropdownMenuItem asChild>
                           <Link
                             href={`/admin/batches/${batchId}/edit/${member._id}`}
+                            className="cursor-pointer"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/recipient-marksheet/${member._id}`}
+                            className="cursor-pointer"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Marksheet
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/marker-marksheet/${member._id}`}
+                            className="cursor-pointer"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Given Marks
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

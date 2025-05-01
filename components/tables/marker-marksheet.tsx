@@ -21,6 +21,7 @@ interface MarkerMarksheetProps {
   markerId: string | undefined;
   markerName: string | undefined;
   bdNo: string | undefined;
+  averageMarks: number | undefined;
   submissions: IGetSubmissionByMarker[];
 }
 
@@ -28,18 +29,9 @@ export function MarkerMarksheet({
   markerId,
   markerName,
   submissions,
-  bdNo
+  bdNo,
+  averageMarks
 }: MarkerMarksheetProps) {
-  // Calculate average marks given
-  const averageMarks =
-    submissions.length > 0
-      ? Math.round(
-          (submissions.reduce((sum, sub) => sum + sub.marks, 0) /
-            submissions.length) *
-            100
-        ) / 100
-      : 0;
-
   return (
     <Card>
       <CardHeader>

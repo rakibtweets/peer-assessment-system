@@ -22,3 +22,13 @@ export interface IGetSubmissionByMarker {
   marks: number;
   submitted: Date;
 }
+
+export interface IGetSubmissionsForRecipient {
+  marker: {
+    name: string;
+    bdNo: string;
+    rank: string;
+  };
+  marks: number;
+  submitted: Date;
+}

@@ -10,7 +10,10 @@ import {
   submissionFormSchema
 } from '../validation/submissionSchema';
 import Member, { IMember } from '@/database/member.model';
-import { IGetSubmissionByMarker } from '@/types/actions';
+import {
+  IGetSubmissionByMarker,
+  IGetSubmissionsForRecipient
+} from '@/types/actions';
 
 export async function createSubmission(data: SubmissionFormValues[]): Promise<
   ActionResponse<{
@@ -86,6 +89,7 @@ export async function getSubmissionByMarker(markerId: string): Promise<
   ActionResponse<{
     submissions: IGetSubmissionByMarker[];
     marker: IMember;
+    averageMarks: number;
   }>
 > {
   try {
@@ -113,13 +117,75 @@ export async function getSubmissionByMarker(markerId: string): Promise<
       submitted: submission.createdAt
     })) as IGetSubmissionByMarker[];
 
+    const totalMarks = formatted.reduce((sum, s) => sum + s.marks, 0);
+    const averageMarksGiven =
+      formatted.length > 0
+        ? parseFloat((totalMarks / formatted.length).toFixed(2))
+        : 0;
+
     const marker = await Member.findById(markerId).select('name _id bdNo');
 
     return {
       success: true,
       data: {
         submissions: formatted,
-        marker: marker
+        marker: marker,
+        averageMarks: averageMarksGiven
+      }
+    };
+  } catch (error) {
+    return handleError(error) as ErrorResponse;
+  }
+}
+
+export async function getSubmissionsForRecipient(recipientId: string): Promise<
+  ActionResponse<{
+    submissions: IGetSubmissionsForRecipient[];
+    averageMarks: number;
+    recipient: IMember;
+  }>
+> {
+  try {
+    await dbConnect();
+
+    const submissions = await Submission.find({ recipient: recipientId })
+      .populate({
+        path: 'marker',
+        select: 'name bdNo rank',
+        model: Member
+      })
+      .sort({ submitted: -1 });
+
+    if (!submissions) {
+      throw new Error('No submissions found');
+    }
+
+    const formatted = submissions.map((submission) => ({
+      marker: {
+        name: submission.marker.name,
+        bdNo: submission.marker.bdNo,
+        rank: submission.marker.rank
+      },
+      marks: submission.marks,
+      submitted: submission.createdAt
+    }));
+
+    const totalMarks = formatted.reduce((sum, s) => sum + s.marks, 0);
+    const averageMarks =
+      formatted.length > 0
+        ? parseFloat((totalMarks / formatted.length).toFixed(2))
+        : 0;
+
+    const recipient = await Member.findById(recipientId).select(
+      'name _id bdNo'
+    );
+
+    return {
+      success: true,
+      data: {
+        submissions: formatted,
+        averageMarks,
+        recipient: recipient
       }
     };
   } catch (error) {

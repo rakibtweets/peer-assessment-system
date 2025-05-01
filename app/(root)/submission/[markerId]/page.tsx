@@ -17,6 +17,7 @@ export default async function MarkerMarksheetPage({
   const response = await getSubmissionByMarker(params.markerId);
   const submissions = response.data?.submissions || [];
   const marker = response.data?.marker;
+  const averageMarks = response.data?.averageMarks;
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -38,6 +39,7 @@ export default async function MarkerMarksheetPage({
           markerId={params.markerId}
           markerName={marker?.name}
           submissions={submissions}
+          averageMarks={averageMarks}
           bdNo={marker?.bdNo}
         />
       </div>
