@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Layers, Users, ArrowRight, PlusCircle } from 'lucide-react';
-
 import {
   Card,
   CardContent,
@@ -12,17 +11,19 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useBatches } from '@/lib/hooks/use-batches';
+import { IBatch } from '@/database/batch.model';
 
-export function BatchCards() {
-  const { batches } = useBatches();
+interface IBatchCardProps {
+  batches: IBatch[];
+}
 
+export function BatchCards({ batches }: IBatchCardProps) {
   return (
     <div>
       <h2 className="mb-4 text-xl font-semibold">Batches</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {batches.map((batch) => (
-          <Card key={batch.id}>
+        {batches?.map((batch) => (
+          <Card key={batch._id as string}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">
                 {batch.name}
@@ -42,7 +43,7 @@ export function BatchCards() {
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full">
-                <Link href={`/admin/batches/${batch.id}`}>
+                <Link href={`/admin/batches/${batch._id}`}>
                   View Members
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
