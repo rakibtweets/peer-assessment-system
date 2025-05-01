@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -35,6 +34,9 @@ import { getAllMembersByBatchId } from '@/lib/actions/member.action';
 import { IMember } from '@/database/member.model';
 import { BatchSelector } from '../batch-selector';
 import { Form } from '../ui/form';
+import { createSubmission } from '@/lib/actions/submission.action';
+import { SubmissionFormValues } from '@/lib/validation/submissionSchema';
+import { IBatch } from '@/database/batch.model';
 
 // Create a schema for the marks
 const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
@@ -55,7 +57,12 @@ const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
   return z.object(schema);
 };
 
-export function HorizontalBatchMarkingForm() {
+interface HorizontalBatchMarkingFormProps {
+  batches: IBatch[];
+}
+export function HorizontalBatchMarkingForm({
+  batches
+}: HorizontalBatchMarkingFormProps) {
   const { toast } = useToast();
   const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [selectedBatchName, setSelectedBatchName] = useState<string>('');
@@ -154,7 +161,7 @@ export function HorizontalBatchMarkingForm() {
             marks: marks as number
           };
         })
-        .filter(Boolean);
+        .filter(Boolean) as SubmissionFormValues[];
 
       console.log('submissions:', submissions);
 
@@ -169,14 +176,24 @@ export function HorizontalBatchMarkingForm() {
       }
 
       // await submitBatchMarks(submissions);
+      const response = await createSubmission(submissions);
 
-      toast({
-        title: 'Success',
-        description: `Successfully submitted marks for ${submissions.length} members.`
-      });
+      if (response.success) {
+        toast({
+          title: 'Success',
+          description: `Successfully submitted marks for ${response.data?.submissions.length} members.`
+        });
+        form.reset();
+        setSubmitting(false);
+      } else {
+        toast({
+          title: 'Error',
+          description: response.error?.message || 'Failed to submit marks.',
+          variant: 'destructive'
+        });
+      }
 
       // Reset the form
-      form.reset();
     } catch (error) {
       console.error('Failed to submit marks:', error);
       toast({
@@ -201,7 +218,10 @@ export function HorizontalBatchMarkingForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <BatchSelector onBatchSelect={handleBatchSelect} />
+            <BatchSelector
+              batches={batches}
+              onBatchSelect={handleBatchSelect}
+            />
 
             {selectedBatchId && members.length > 0 && (
               <div className="flex flex-col space-y-1.5">

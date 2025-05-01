@@ -4,10 +4,11 @@ export interface ISubmission extends Document {
   batchId: Schema.Types.ObjectId; // Reference to the Batch
   marker: Schema.Types.ObjectId; // Reference to the Member who is marking
   markerBdNo: string; // The BD number of the marker
-  recipient: Schema.Types.ObjectId; // Reference to the Member being marked
+  recipient: Schema.Types.ObjectId;
   recipientBDNo: string;
   marks: number;
-  submitted: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const submissionSchema = new Schema<ISubmission>(
@@ -39,7 +40,11 @@ export const submissionSchema = new Schema<ISubmission>(
       type: Number,
       required: true
     },
-    submitted: {
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
       type: Date,
       default: Date.now
     }
@@ -50,6 +55,6 @@ export const submissionSchema = new Schema<ISubmission>(
 );
 
 const Submission =
-  models.Submission || model<ISubmission>('Submission', submissionSchema);
+  models?.Submission || model<ISubmission>('Submission', submissionSchema);
 
 export default Submission;

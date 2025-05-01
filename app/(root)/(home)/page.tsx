@@ -1,8 +1,9 @@
-// import MarkForm from '@/components/forms/MarkForm';
-
 import { HorizontalBatchMarkingForm } from '@/components/forms/HorizontalBatchMarkingForm';
+import { getAllBatches } from '@/lib/actions/batch.action';
 
-export default function Home() {
+export default async function Home() {
+  const response = await getAllBatches();
+  const batches = response.data?.batches || [];
   return (
     <main className="container mx-auto py-10 px-4">
       <div className="max-w-3xl mx-auto">
@@ -12,7 +13,7 @@ export default function Home() {
           others with a score between 1 and 26.
         </p>
         {/* <MarkForm /> */}
-        <HorizontalBatchMarkingForm />
+        <HorizontalBatchMarkingForm batches={batches} />
       </div>
     </main>
   );
