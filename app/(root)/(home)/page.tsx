@@ -1,4 +1,4 @@
-import { HorizontalBatchMarkingForm } from '@/components/forms/HorizontalBatchMarkingForm';
+import { BatchMarkingForm } from '@/components/forms/BatchMarkingForm';
 import { getAllBatches } from '@/lib/actions/batch.action';
 
 export default async function Home() {
@@ -10,10 +10,9 @@ export default async function Home() {
         <h1 className="text-3xl font-bold mb-6">Peer Marking System</h1>
         <p className="text-muted-foreground mb-8">
           Fill out the form below to mark your batch mates. Each person can mark
-          others with a score between 1 and 26.
+          others.
         </p>
-        {/* <MarkForm /> */}
-        <HorizontalBatchMarkingForm batches={batches} />
+        <BatchMarkingForm batches={batches} />
       </div>
     </main>
   );

@@ -86,7 +86,6 @@ export default function BatchForm({ batchId, type, batch }: BatchFormProps) {
           ...values
         });
         if (res.success) {
-          console.log('Create batch values', values);
           toast({
             title: 'Batch updated',
             description: 'Batch updated successfully.',

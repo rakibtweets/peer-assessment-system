@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -61,9 +61,7 @@ const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
 interface HorizontalBatchMarkingFormProps {
   batches: IBatch[];
 }
-export function HorizontalBatchMarkingForm({
-  batches
-}: HorizontalBatchMarkingFormProps) {
+export function BatchMarkingForm({ batches }: HorizontalBatchMarkingFormProps) {
   const { toast } = useToast();
   const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [selectedBatchName, setSelectedBatchName] = useState<string>('');
@@ -71,6 +69,9 @@ export function HorizontalBatchMarkingForm({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [currentMember, setCurrentMember] = useState<IMember | null>(null);
+  const [duplicateMarksErrors, setDuplicateMarksErrors] = useState<
+    Record<string, string>
+  >({});
   const router = useRouter();
 
   // Create a dynamic form schema based on members
@@ -131,6 +132,43 @@ export function HorizontalBatchMarkingForm({
     form.reset(defaultValues);
   };
 
+  // Function to validate that marks are unique
+  const validateUniqueMarks = () => {
+    const values = form.getValues();
+    const marksUsed: Record<number, string[]> = {};
+    let hasDuplicates = false;
+    const newErrors: Record<string, string> = {};
+
+    // Reset errors first
+    setDuplicateMarksErrors({});
+
+    // Skip the current member (they can't mark themselves)
+    Object.entries(values).forEach(([memberId, mark]) => {
+      if (memberId !== currentMember?.id && mark !== undefined) {
+        if (!marksUsed[mark]) {
+          marksUsed[mark] = [memberId];
+        } else {
+          marksUsed[mark].push(memberId);
+          hasDuplicates = true;
+        }
+      }
+    });
+
+    // Create error messages for duplicates
+    Object.entries(marksUsed).forEach(([mark, memberIds]) => {
+      if (memberIds.length > 1) {
+        memberIds.forEach((memberId) => {
+          newErrors[memberId] = `Mark ${mark} is already used for ${
+            memberIds.length - 1
+          } other member(s)`;
+        });
+      }
+    });
+
+    setDuplicateMarksErrors(newErrors);
+    return !hasDuplicates;
+  };
+
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!currentMember || !selectedBatchId) {
@@ -141,10 +179,18 @@ export function HorizontalBatchMarkingForm({
       });
       return;
     }
+    // Validate that marks are unique
+    if (!validateUniqueMarks()) {
+      toast({
+        title: 'Error',
+        description:
+          'Each member must receive a unique mark. Please fix the duplicate marks.',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setSubmitting(true);
-
-    console.log('form values', values);
 
     try {
       // Convert form values to submission format
@@ -164,8 +210,6 @@ export function HorizontalBatchMarkingForm({
           };
         })
         .filter(Boolean) as SubmissionFormValues[];
-
-      console.log('submissions:', submissions);
 
       if (submissions.length === 0) {
         toast({
@@ -206,14 +250,27 @@ export function HorizontalBatchMarkingForm({
     }
   };
 
+  // Validate unique marks whenever form values change
+  useEffect(() => {
+    if (members.length > 0 && currentMember) {
+      const subscription = form.watch((value, { name }) => {
+        // Only validate if a mark field changed
+        if (name && members.some((m) => m._id === name)) {
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [form, members, currentMember]);
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Batch Marking System</CardTitle>
           <CardDescription>
-            Select a batch and then mark all members at once. You cannot mark
-            yourself.
+            Select a batch and then mark all members at once. Each member must
+            receive a unique mark.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -281,7 +338,7 @@ export function HorizontalBatchMarkingForm({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {members?.map((member) => (
+                      {members?.map((member: IMember) => (
                         <TableRow
                           key={member._id as string}
                           className={
@@ -339,6 +396,11 @@ export function HorizontalBatchMarkingForm({
                                     form.formState.errors[member._id as string]
                                       ?.message as string
                                   }
+                                </p>
+                              )}
+                              {duplicateMarksErrors[member._id as string] && (
+                                <p className="text-sm font-medium text-destructive ml-2">
+                                  {duplicateMarksErrors[member._id as string]}
                                 </p>
                               )}
                             </div>
