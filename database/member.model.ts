@@ -10,12 +10,11 @@ export interface IMember extends Document {
   batchId: mongoose.Types.ObjectId;
   averageMarks: number;
   submissionCount: number;
-  // submissions: {
-  //   memberId: mongoose.Types.ObjectId;
-  //   batchId: mongoose.Types.ObjectId;
-  //   bdNo: string;
-  //   mark: number;
-  // };
+  submissionStatus: {
+    batchId: mongoose.Types.ObjectId;
+    completed: boolean;
+    submittedAt: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,7 +57,17 @@ const memberSchema = new Schema<IMember>(
       type: Number,
       default: 0
     },
-
+    submissionStatus: [
+      {
+        batchId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Batch',
+          required: true
+        },
+        completed: { type: Boolean, default: false },
+        submittedAt: { type: Date, default: null }
+      }
+    ],
     createdAt: {
       type: Date,
       default: Date.now

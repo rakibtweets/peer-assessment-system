@@ -28,6 +28,7 @@ export async function createSubmission(data: SubmissionFormValues[]): Promise<
 
   try {
     await dbConnect();
+    const { marker, batchId } = data[0];
     const createdSubmissions = await Submission.insertMany(data);
 
     if (!createdSubmissions) {
@@ -52,10 +53,23 @@ export async function createSubmission(data: SubmissionFormValues[]): Promise<
       await recipient.save();
     }
 
+    const markerMember = await Member.findById(marker);
+
+    const alreadySubmitted = markerMember?.submissionStatus.some(
+      (s: any) => s.batchId.toString() === batchId
+    );
+
+    if (!alreadySubmitted) {
+      markerMember?.submissionStatus.push({
+        batchId,
+        completed: true,
+        submittedAt: new Date()
+      });
+      await markerMember?.save();
+    }
+
     revalidatePath('/admin/submissions');
     revalidatePath('/admin');
-
-    console.log('Created submissions:', createdSubmissions);
 
     return {
       success: true,

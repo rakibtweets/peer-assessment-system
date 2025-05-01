@@ -240,14 +240,22 @@ export function HorizontalBatchMarkingForm({
                   value={(currentMember?._id as string) || ''}
                 >
                   <option value="">Select a member</option>
-                  {members.map((member) => (
-                    <option
-                      key={member._id as string}
-                      value={member._id as string}
-                    >
-                      {member.name} ({member.rank})
-                    </option>
-                  ))}
+                  {members?.map((member) => {
+                    const isSubmitted = member.submissionStatus?.some(
+                      (status: any) =>
+                        (status.batchId as string) === selectedBatchId
+                    );
+                    return (
+                      <option
+                        key={member._id as string}
+                        value={member._id as string}
+                        disabled={isSubmitted}
+                      >
+                        {member.name} ({member.rank})
+                        {isSubmitted ? '(submitted)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             )}
