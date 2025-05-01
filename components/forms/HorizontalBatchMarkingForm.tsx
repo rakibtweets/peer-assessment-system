@@ -42,9 +42,14 @@ const createMarkingSchema = (members: IMember[], currentMemberId: string) => {
 
   members.forEach((member) => {
     // Skip the current member (can't mark themselves)
-    if (member._id !== currentMemberId) {
-      schema[member._id as string] = z.number();
-    }
+    schema[member._id as string] = z
+      .number()
+      .min(1, {
+        message: 'Marks must be greater than 0'
+      })
+      .max(members.length, {
+        message: `Marks must be between 1 and ${members.length}`
+      });
   });
 
   return z.object(schema);
@@ -244,7 +249,7 @@ export function HorizontalBatchMarkingForm() {
                         <TableHead>Rank</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Branch</TableHead>
-                        <TableHead>Marks (1-26)</TableHead>
+                        <TableHead>Marks{`1-${members.length}`}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -260,59 +265,55 @@ export function HorizontalBatchMarkingForm() {
                           <TableCell>{member.bdNo}</TableCell>
                           <TableCell>{member.bupNo}</TableCell>
                           <TableCell>{member.rank}</TableCell>
-                          <TableCell>{member.name}</TableCell>
+                          <TableCell>
+                            {member.name}{' '}
+                            {member._id === currentMember._id ? '(you)' : ''}
+                          </TableCell>
                           <TableCell>{member.branch}</TableCell>
                           <TableCell>
-                            {member._id === currentMember._id ? (
-                              <span className="text-muted-foreground italic">
-                                Cannot mark yourself
-                              </span>
-                            ) : (
-                              <div className="flex flex-col items-center">
-                                <Select
-                                  onValueChange={(value) =>
-                                    form.setValue(
-                                      member._id as string,
-                                      Number.parseInt(value),
-                                      { shouldValidate: true }
-                                    )
+                            <div className="flex flex-col items-center">
+                              <Select
+                                onValueChange={(value) =>
+                                  form.setValue(
+                                    member._id as string,
+                                    Number.parseInt(value),
+                                    { shouldValidate: true }
+                                  )
+                                }
+                                value={
+                                  form
+                                    .watch(member._id as string)
+                                    ?.toString() || ''
+                                }
+                              >
+                                <SelectTrigger className="w-20">
+                                  <SelectValue
+                                    placeholder={`(1-${members.length})`}
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from(
+                                    { length: members.length },
+                                    (_, i) => i + 1
+                                  ).map((mark) => (
+                                    <SelectItem
+                                      key={mark}
+                                      value={mark.toString()}
+                                    >
+                                      {mark}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {form.formState.errors[member._id as string] && (
+                                <p className="text-sm font-medium text-destructive ml-2">
+                                  {
+                                    form.formState.errors[member._id as string]
+                                      ?.message as string
                                   }
-                                  value={
-                                    form
-                                      .watch(member._id as string)
-                                      ?.toString() || ''
-                                  }
-                                >
-                                  <SelectTrigger className="w-20">
-                                    <SelectValue placeholder="1-26" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {Array.from(
-                                      { length: 26 },
-                                      (_, i) => i + 1
-                                    ).map((mark) => (
-                                      <SelectItem
-                                        key={mark}
-                                        value={mark.toString()}
-                                      >
-                                        {mark}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                {form.formState.errors[
-                                  member._id as string
-                                ] && (
-                                  <p className="text-sm font-medium text-destructive ml-2">
-                                    {
-                                      form.formState.errors[
-                                        member._id as string
-                                      ]?.message as string
-                                    }
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                                </p>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
