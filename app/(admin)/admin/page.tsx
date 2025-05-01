@@ -1,6 +1,9 @@
 import { BatchCards } from '@/components/cards/BatchCard';
+import { getAllBatches } from '@/lib/actions/batch.action';
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const res = await getAllBatches();
+  const batches = res.data?.batches || [];
   return (
     <div className="space-y-6">
       <div>
@@ -9,7 +12,7 @@ export default function AdminPage() {
           Manage batches and view marking data.
         </p>
       </div>
-      <BatchCards />
+      <BatchCards batches={batches} />
     </div>
   );
 }
