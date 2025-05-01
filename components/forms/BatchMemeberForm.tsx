@@ -103,7 +103,6 @@ export function BatchMemberForm({
           ...values
         });
         if (res.success) {
-          console.log('Create batch member values', values);
           toast({
             title: 'Batch member updated',
             description: 'Batch member updated successfully.',
@@ -121,7 +120,10 @@ export function BatchMemberForm({
         }
       }
     } catch (error) {
-      console.error('Failed to add member:', error);
+      toast({
+        title: 'An unexpected error occurred',
+        variant: 'destructive'
+      });
     } finally {
       setIsSubmitting(false);
     }

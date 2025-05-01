@@ -12,3 +12,23 @@ export interface GetAllMembersByBatchIdParams {
 export interface CreateBatchMemberParams extends BatchMemberFormSchemaValues {
   batchId: string;
 }
+
+export interface IGetSubmissionByMarker {
+  recipient: {
+    name: string;
+    bdNo: string;
+    rank: string;
+  };
+  marks: number;
+  submitted: Date;
+}
+
+export interface IGetSubmissionsForRecipient {
+  marker: {
+    name: string;
+    bdNo: string;
+    rank: string;
+  };
+  marks: number;
+  submitted: Date;
+}
