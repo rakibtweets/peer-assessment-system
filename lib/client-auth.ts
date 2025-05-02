@@ -37,12 +37,13 @@ export const logout = async () => {
 };
 
 // Check if user is authenticated
-export const isAuthenticated = (): boolean => {
-  return getCurrentUser() !== null;
+export const isAuthenticated = async (): Promise<boolean> => {
+  const user = await getCurrentUser();
+  return user !== null;
 };
 
 // Check if user is admin
-export const isAdmin = (): boolean => {
-  const user = getCurrentUser();
+export const isAdmin = async (): Promise<boolean> => {
+  const user = await getCurrentUser();
   return !!user?.isAdmin;
 };
