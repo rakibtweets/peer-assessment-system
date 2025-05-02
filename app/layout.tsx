@@ -6,6 +6,7 @@ import React from 'react';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from '@/components/ui/toaster';
 import Providers from './provider';
+import { AuthProvider } from '@/contexts/auth-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,7 +34,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
         <NextTopLoader showSpinner={false} />
-        <Providers>{children}</Providers>
+        <AuthProvider>
+          <Providers>{children}</Providers>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
