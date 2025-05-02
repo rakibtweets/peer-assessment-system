@@ -1,4 +1,11 @@
-import { Users, Home, LayoutDashboard, Layers, Settings } from 'lucide-react';
+import {
+  Users,
+  Home,
+  LayoutDashboard,
+  Layers,
+  Settings,
+  LogOut
+} from 'lucide-react';
 
 import {
   Sidebar,
@@ -12,6 +19,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
+import LogoutButton from '../buttons/LogoutButton';
 
 // Menu items.
 const items = [
@@ -57,9 +65,7 @@ export function AdminDashboardSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/admin/settings">Settings</Link>
-            </SidebarMenuButton>
+            <LogoutButton />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

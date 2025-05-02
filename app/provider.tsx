@@ -13,8 +13,7 @@ const Providers = ({ children }: ProvidersProps) => {
       enableSystem
       disableTransitionOnChange
     >
-            
-            {children}
+      {children}
     </ThemeProvider>
   );
 };
