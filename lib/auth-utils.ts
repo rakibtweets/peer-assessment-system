@@ -2,7 +2,7 @@
 //auth-utils.ts
 import jwt from 'jsonwebtoken';
 
-const SECRET_KEY = process.env.NEXT_PUBLIC_JWT_SECRET as string;
+const SECRET_KEY = process.env.JWT_SECRET as string;
 
 if (!SECRET_KEY) {
   throw new Error('JWT_SECRET environment variable is not defined');
