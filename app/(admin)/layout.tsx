@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import React from 'react';
 import { AdminDashboardSidebar } from '@/components/admin/admin-sidebar';
 import { ThemeToggle } from '@/components/ui/ThemeToogle';
+import ProfileAvatar from '@/components/shared/PofileAvatar';
 
 const AdminDashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -13,7 +14,7 @@ const AdminDashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <SidebarTrigger />
             <div className="flex items-center justify-between gap-x-4">
               <ThemeToggle />
-              {/* <ProfileAvatar /> */}
+              <ProfileAvatar />
             </div>
           </div>
         </div>

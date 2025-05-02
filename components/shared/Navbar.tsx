@@ -1,5 +1,6 @@
 import { Award } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToogle';
+import ProfileAvatar from './PofileAvatar';
 
 const Navbar = () => {
   return (
@@ -9,8 +10,9 @@ const Navbar = () => {
           <Award className="h-6 w-6 text-primary" />
           <span className="text-lg font-semibold">Peer Assessment</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-x-4">
           <ThemeToggle />
+          <ProfileAvatar />
         </div>
       </div>
     </header>
