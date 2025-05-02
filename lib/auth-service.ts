@@ -6,8 +6,8 @@ import { redirect } from 'next/navigation';
 import { User, verifyToken } from './auth-utils';
 
 // Get current user from cookie on the server
-export const getCurrentUser = (): User | null => {
-  const cookieStore = cookies();
+export const getCurrentUser = async (): Promise<User | null> => {
+  const cookieStore = await cookies();
   const token = cookieStore.get('auth-token')?.value;
 
   if (!token) return null;
@@ -21,8 +21,8 @@ export const isAuthenticated = (): boolean => {
 };
 
 // Check if user is admin
-export const isAdmin = (): boolean => {
-  const user = getCurrentUser();
+export const isAdmin = async (): Promise<boolean> => {
+  const user = await getCurrentUser();
   return !!user?.isAdmin;
 };
 
