@@ -106,8 +106,9 @@ export const updateBatchMember = async (
       throw new Error('Batch not found or update failed');
     }
 
-    revalidatePath('/admin/batches');
-    revalidatePath('/batches');
+    revalidatePath(`/admin/batches`);
+    revalidatePath(`/admin`);
+    revalidatePath('/');
 
     return {
       success: true,
@@ -179,8 +180,9 @@ export async function deleteBatchMember({
       throw new Error('Failed to update batch member count');
     }
 
-    revalidatePath('/admin/batches');
-    revalidatePath('/admin');
+    revalidatePath(`/admin/batches`);
+    revalidatePath(`/admin`);
+    revalidatePath('/');
 
     revalidatePath(path);
 
