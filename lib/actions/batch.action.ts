@@ -55,6 +55,7 @@ export async function createBatch(data: BatchFormSchemaValues): Promise<
     }
     revalidatePath('/admin/batches');
     revalidatePath('/admin');
+    revalidatePath('/');
 
     return {
       success: true,
@@ -156,7 +157,7 @@ export async function deleteBatch({
 
     // Delete members from Memeber model
     await Member.deleteMany({
-      batch: batch._id
+      batchId: batch._id
     });
 
     revalidatePath(path);

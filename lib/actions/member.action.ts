@@ -67,6 +67,9 @@ export async function createBatchMember(data: CreateBatchMemberParams): Promise<
       throw new Error('Failed to update batch member count');
     }
     revalidatePath(`/admin/batches/${data.batchId}`);
+    revalidatePath(`/admin/batches`);
+    revalidatePath(`/admin`);
+    revalidatePath('/');
 
     return {
       success: true,
