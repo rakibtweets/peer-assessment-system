@@ -5,8 +5,8 @@ export default async function Home() {
   const response = await getAllBatches();
   const batches = response.data?.batches || [];
   return (
-    <main className="container mx-auto py-10 px-4">
-      <div className="max-w-3xl mx-auto">
+    <>
+      <div className=" mx-auto">
         <h1 className="text-3xl font-bold mb-6">Peer Marking System</h1>
         <p className="text-muted-foreground mb-8">
           Fill out the form below to mark your batch mates. Each person can mark
@@ -14,6 +14,6 @@ export default async function Home() {
         </p>
         <BatchMarkingForm batches={batches} />
       </div>
-    </main>
+    </>
   );
 }

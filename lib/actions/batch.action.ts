@@ -162,6 +162,7 @@ export async function deleteBatch({
 
     revalidatePath('/admin/batches');
     revalidatePath('/admin');
+    revalidatePath('/');
     revalidatePath(path);
 
     return {

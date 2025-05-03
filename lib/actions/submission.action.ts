@@ -72,7 +72,9 @@ export async function createSubmission(data: SubmissionFormValues[]): Promise<
     }
 
     revalidatePath('/admin/submissions');
-    revalidatePath('/admin');
+    revalidatePath(`/admin/batches`);
+    revalidatePath(`/admin`);
+    revalidatePath('/');
 
     return {
       success: true,
