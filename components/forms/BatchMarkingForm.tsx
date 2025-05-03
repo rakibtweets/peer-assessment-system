@@ -330,7 +330,6 @@ export function BatchMarkingForm({ batches }: HorizontalBatchMarkingFormProps) {
                     <TableHeader>
                       <TableRow>
                         <TableHead>BD No</TableHead>
-                        <TableHead>BUP No</TableHead>
                         <TableHead>Rank</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Branch</TableHead>
@@ -348,7 +347,6 @@ export function BatchMarkingForm({ batches }: HorizontalBatchMarkingFormProps) {
                           }
                         >
                           <TableCell>{member.bdNo}</TableCell>
-                          <TableCell>{member.bupNo}</TableCell>
                           <TableCell>{member.rank}</TableCell>
                           <TableCell>
                             {member.name}{' '}

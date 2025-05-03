@@ -54,7 +54,6 @@ export function BatchMembersTable({
       (member) =>
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.bdNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.bupNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.rank.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.branch.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -80,8 +79,8 @@ export function BatchMembersTable({
           <TableCaption>A list of all members in {batch?.name}.</TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead>Serial No</TableHead>
               <TableHead>BD Number</TableHead>
-              <TableHead>BUP Number</TableHead>
               <TableHead>Rank</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Branch</TableHead>
@@ -91,10 +90,10 @@ export function BatchMembersTable({
           </TableHeader>
           <TableBody>
             {filteredData.length > 0 ? (
-              filteredData.map((member) => (
+              filteredData.map((member, index) => (
                 <TableRow key={member._id as string}>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{member.bdNo}</TableCell>
-                  <TableCell>{member.bupNo}</TableCell>
                   <TableCell>{member.rank}</TableCell>
                   <TableCell>{member.name}</TableCell>
                   <TableCell>{member.branch}</TableCell>

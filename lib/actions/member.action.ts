@@ -26,7 +26,7 @@ export async function getAllMembersByBatchId(
     await dbConnect();
     const { batchId } = params;
     const members = await Member.find({ batchId: batchId }).sort({
-      createdAt: -1
+      createdAt: 1
     });
     return {
       success: true,
