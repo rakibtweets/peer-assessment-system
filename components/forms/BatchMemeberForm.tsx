@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { useBatchById } from '@/lib/hooks/use-batch-by-id';
 import { batchMemberformSchema } from '@/lib/validation/memberSchema';
 import {
   createBatchMember,
@@ -64,7 +63,6 @@ export function BatchMemberForm({
     resolver: zodResolver(batchMemberformSchema),
     defaultValues: {
       bdNo: member?.bdNo || '',
-      bupNo: member?.bupNo || '',
       rank: member?.rank || '',
       name: member?.name || '',
       branch: member?.branch || ''
@@ -129,15 +127,18 @@ export function BatchMemberForm({
     }
   }
 
-  const rankOptions = [
-    'officer cadet',
-    'Lieutenant',
-    'Captain',
-    'Major',
-    'Colonel',
-    'General'
+  const rankOptions = ['OC', 'LOC', 'OC Cpl', 'OC Sgt', 'SJUO', 'SSUO', 'ASUO'];
+  const branchOptions = [
+    'GD(P)',
+    'Engg',
+    'Fin',
+    'ATC/ADWC',
+    'Log',
+    'Admin',
+    'Edn',
+    'Legal',
+    'Met'
   ];
-  const branchOptions = ['GD(P)', 'Log', 'ATC/ADWC'];
 
   return (
     <Card>
@@ -162,23 +163,6 @@ export function BatchMemberForm({
                     </FormControl>
                     <FormDescription>
                       The unique BD number for this member.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bupNo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>BUP Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. BUP001" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      The unique BUP number for this member.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

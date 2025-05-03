@@ -8,7 +8,8 @@ import {
   Pencil,
   Trash,
   Eye,
-  Users
+  Users,
+  Plus
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -109,7 +110,7 @@ export default function BatchesTable({ batches }: IBatchTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
+              <TableHead className="w-[100px]">No</TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -151,11 +152,9 @@ export default function BatchesTable({ batches }: IBatchTableProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedBatches?.map((batch) => (
+              sortedBatches?.map((batch, index) => (
                 <TableRow key={batch._id as string}>
-                  <TableCell className="font-medium">
-                    {batch._id as string}
-                  </TableCell>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell>{batch?.name}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
@@ -178,6 +177,12 @@ export default function BatchesTable({ batches }: IBatchTableProps) {
                           <Link href={`/admin/batches/${batch._id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Members
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/batches/${batch._id}/add-member`}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Members
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>

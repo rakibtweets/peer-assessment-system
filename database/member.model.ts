@@ -3,7 +3,6 @@ import mongoose, { Schema, models, model, Document } from 'mongoose';
 // Interface for Member document
 export interface IMember extends Document {
   bdNo: string;
-  bupNo: string;
   rank: string;
   name: string;
   branch: string;
@@ -27,11 +26,7 @@ const memberSchema = new Schema<IMember>(
       required: true,
       unique: true
     },
-    bupNo: {
-      type: String,
-      required: true,
-      unique: true
-    },
+
     rank: {
       type: String,
       required: true
