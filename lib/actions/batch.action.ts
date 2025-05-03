@@ -160,6 +160,8 @@ export async function deleteBatch({
       batchId: batch._id
     });
 
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin');
     revalidatePath(path);
 
     return {

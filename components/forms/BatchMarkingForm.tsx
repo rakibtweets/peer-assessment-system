@@ -264,161 +264,170 @@ export function BatchMarkingForm({ batches }: HorizontalBatchMarkingFormProps) {
   }, [form, members, currentMember]);
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Batch Marking System</CardTitle>
-          <CardDescription>
-            Select a batch and then mark all members at once. Each member must
-            receive a unique mark.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <BatchSelector
-              batches={batches}
-              onBatchSelect={handleBatchSelect}
-            />
+    <>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Batch Marking System</CardTitle>
+            <CardDescription>
+              Select a batch and then mark all members at once. Each member must
+              receive a unique mark.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <BatchSelector
+                batches={batches}
+                onBatchSelect={handleBatchSelect}
+              />
 
-            {selectedBatchId && members.length > 0 && (
-              <div className="flex flex-col space-y-1.5">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Select Who Is Marking
-                </label>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  onChange={(e) => {
-                    const memberId = e.target.value;
-                    const member = members.find((m) => m._id === memberId);
-                    if (member) {
-                      handleMarkingMemberSelect(member);
-                    }
-                  }}
-                  value={(currentMember?._id as string) || ''}
-                >
-                  <option value="">Select a member</option>
-                  {members?.map((member) => {
-                    const isSubmitted = member.submissionStatus?.some(
-                      (status: any) =>
-                        (status.batchId as string) === selectedBatchId
-                    );
-                    return (
-                      <option
-                        key={member._id as string}
-                        value={member._id as string}
-                        disabled={isSubmitted}
-                      >
-                        {member.name} ({member.rank})
-                        {isSubmitted ? '(submitted)' : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            )}
-          </div>
-
-          {loading && (
-            <div className="text-center py-4">Loading members...</div>
-          )}
-
-          {!loading && selectedBatchId && currentMember && (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="border rounded-md overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>BD No</TableHead>
-                        <TableHead>Rank</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Branch</TableHead>
-                        <TableHead>Marks{`1-${members.length}`}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {members?.map((member: IMember) => (
-                        <TableRow
+              {selectedBatchId && members.length > 0 && (
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Select Who Is Marking
+                  </label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    onChange={(e) => {
+                      const memberId = e.target.value;
+                      const member = members.find((m) => m._id === memberId);
+                      if (member) {
+                        handleMarkingMemberSelect(member);
+                      }
+                    }}
+                    value={(currentMember?._id as string) || ''}
+                  >
+                    <option value="">Select a member</option>
+                    {members?.map((member) => {
+                      const isSubmitted = member.submissionStatus?.some(
+                        (status: any) =>
+                          (status.batchId as string) === selectedBatchId
+                      );
+                      return (
+                        <option
                           key={member._id as string}
-                          className={
-                            member._id === currentMember._id
-                              ? 'bg-muted/50'
-                              : ''
-                          }
+                          value={member._id as string}
+                          disabled={isSubmitted}
                         >
-                          <TableCell>{member.bdNo}</TableCell>
-                          <TableCell>{member.rank}</TableCell>
-                          <TableCell>
-                            {member.name}{' '}
-                            {member._id === currentMember._id ? '(you)' : ''}
-                          </TableCell>
-                          <TableCell>{member.branch}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col items-center">
-                              <Select
-                                onValueChange={(value) =>
-                                  form.setValue(
-                                    member._id as string,
-                                    Number.parseInt(value),
-                                    { shouldValidate: true }
-                                  )
-                                }
-                                value={
-                                  form
-                                    .watch(member._id as string)
-                                    ?.toString() || ''
-                                }
-                              >
-                                <SelectTrigger className="w-20">
-                                  <SelectValue
-                                    placeholder={`(1-${members.length})`}
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from(
-                                    { length: members.length },
-                                    (_, i) => i + 1
-                                  ).map((mark) => (
-                                    <SelectItem
-                                      key={mark}
-                                      value={mark.toString()}
-                                    >
-                                      {mark}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              {form.formState.errors[member._id as string] && (
-                                <p className="text-sm font-medium text-destructive ml-2">
-                                  {
-                                    form.formState.errors[member._id as string]
-                                      ?.message as string
-                                  }
-                                </p>
-                              )}
-                              {duplicateMarksErrors[member._id as string] && (
-                                <p className="text-sm font-medium text-destructive ml-2">
-                                  {duplicateMarksErrors[member._id as string]}
-                                </p>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          {member.name} ({member.rank})
+                          {isSubmitted ? '(submitted)' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
+              )}
+            </div>
 
-                <div className="mt-6">
-                  <Button type="submit" disabled={submitting || !currentMember}>
-                    {submitting ? 'Submitting...' : 'Submit All Marks'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            {loading && (
+              <div className="text-center py-4">Loading members...</div>
+            )}
+            {!loading && selectedBatchId && currentMember && (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className="border rounded-md">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Serial No</TableHead>
+                          <TableHead>BD No</TableHead>
+                          <TableHead>Rank</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Branch</TableHead>
+                          <TableHead>Marks{`1-${members.length}`}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {members?.map((member: IMember, index) => (
+                          <TableRow
+                            key={member._id as string}
+                            className={
+                              member._id === currentMember._id
+                                ? 'bg-muted/50'
+                                : ''
+                            }
+                          >
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{member.bdNo}</TableCell>
+                            <TableCell>{member.rank}</TableCell>
+                            <TableCell>
+                              {member.name}{' '}
+                              {member._id === currentMember._id ? '(you)' : ''}
+                            </TableCell>
+                            <TableCell>{member.branch}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-col items-center">
+                                <Select
+                                  onValueChange={(value) =>
+                                    form.setValue(
+                                      member._id as string,
+                                      Number.parseInt(value),
+                                      { shouldValidate: true }
+                                    )
+                                  }
+                                  value={
+                                    form
+                                      .watch(member._id as string)
+                                      ?.toString() || ''
+                                  }
+                                >
+                                  <SelectTrigger className="w-20">
+                                    <SelectValue
+                                      placeholder={`(1-${members.length})`}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from(
+                                      { length: members.length },
+                                      (_, i) => i + 1
+                                    ).map((mark) => (
+                                      <SelectItem
+                                        key={mark}
+                                        value={mark.toString()}
+                                      >
+                                        {mark}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                {form.formState.errors[
+                                  member._id as string
+                                ] && (
+                                  <p className="text-sm font-medium text-destructive ml-2">
+                                    {
+                                      form.formState.errors[
+                                        member._id as string
+                                      ]?.message as string
+                                    }
+                                  </p>
+                                )}
+                                {duplicateMarksErrors[member._id as string] && (
+                                  <p className="text-sm font-medium text-destructive ml-2">
+                                    {duplicateMarksErrors[member._id as string]}
+                                  </p>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="mt-6">
+                    <Button
+                      type="submit"
+                      disabled={submitting || !currentMember}
+                    >
+                      {submitting ? 'Submitting...' : 'Submit All Marks'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
